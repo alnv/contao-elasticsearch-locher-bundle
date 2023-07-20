@@ -1,0 +1,30 @@
+<?php $this->extend('block_unsearchable'); ?>
+<?php $this->block('content'); ?>
+
+<div id="<?= $this->elementId ?>" class="search-container">
+    <form<?php if ($this->action): ?> action="<?= $this->action ?>"<?php endif; ?> method="GET" ref="form">
+        <div class="suggest">
+            <p v-if="didYouMean.length && didYouMean[0] !== keywords"><?= $GLOBALS['TL_LANG']['MSC']['didYouMeanLabel'] ?> <a @click.stop.prevent="setDidYouMeanToKeyword" href="#"><span>{{ didYouMean[0] }}</span></a>?</p>
+        </div>
+        <div class="formbody">
+            <div class="widget widget-text">
+                <label for="ctrl_keywords_<?= $this->uniqueId ?>" class="invisible"><?= $this->keywordLabel ?></label>
+                <input type="search" autocomplete="off" v-model="keywords" name="keywords" id="ctrl_keywords_<?= $this->uniqueId ?>" class="text" value="<?= $this->keyword ?>">
+            </div>
+            <div class="widget widget-submit">
+                <button type="submit" id="ctrl_submit_<?= $this->uniqueId ?>" class="submit"><img src="/bundles/alnvcontaoelasticsearchlocher/search-icon.svg" alt="<?= $this->search ?>"></button>
+            </div>
+        </div>
+    </form>
+    <?php if ($this->isResultPage): ?>
+        <div class="ce_results" v-if="results.length && keywords">
+            <div v-for="result in results" v-html="result.template" class="result"></div>
+        </div>
+    <?php endif; ?>
+</div>
+
+<?php if ($this->script): ?>
+    <?= $this->script ?>
+<?php endif; ?>
+
+<?php $this->endblock(); ?>

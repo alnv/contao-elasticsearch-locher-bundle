@@ -1,0 +1,37 @@
+{
+  "name": "alnv/contao-elasticsearch-locher-bundle",
+  "type": "contao-bundle",
+  "license": "proprietary",
+  "description": "",
+  "authors": [
+    {
+      "name": "Alexander Naumov",
+      "homepage": "https://alexandernaumov.de",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Alnv\\ContaoElasticsearchLocherBundle\\": "src/"
+    }
+  },
+  "require": {
+    "contao/core-bundle": "~4.9",
+    "fusonic/opengraph": "^2.2",
+    "smalot/pdfparser": "^2.4",
+    "elasticsearch/elasticsearch": "^8.6",
+    "sensio/framework-extra-bundle": "^5.2",
+    "menatwork/contao-multicolumnwizard-bundle": "^3.5"
+  },
+  "config": {
+    "preferred-install": "dist"
+  },
+  "extra": {
+    "contao": {
+      "sources": {
+        "": "system/modules/contao-elasticsearch-locher-bundle"
+      }
+    },
+    "contao-manager-plugin": "Alnv\\ContaoElasticsearchLocherBundle\\ContaoManager\\Plugin"
+  }
+}

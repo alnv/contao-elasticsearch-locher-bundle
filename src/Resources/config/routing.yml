@@ -1,0 +1,3 @@
+prosearch:
+  resource: "@AlnvContaoElasticsearchLocherBundle/Controller"
+  type: annotation

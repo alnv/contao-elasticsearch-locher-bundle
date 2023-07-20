@@ -1,0 +1,12 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+  Alnv\ContaoElasticsearchLocherBundle\Cron\DeleteIndices:
+    tags:
+      - { name: contao.cron, interval: minutely }
+  Alnv\ContaoElasticsearchLocherBundle\Controller\ProSearchController:
+    public: true
+  Alnv\ContaoElasticsearchLocherBundle\Search\ProSearchIndexer:
+    tags:
+      - { name: 'contao.search_indexer' }

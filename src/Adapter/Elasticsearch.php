@@ -377,6 +377,42 @@ class Elasticsearch extends Adapter
 
         try {
 
+            if ($this->getClient()->exists(['index' => $arrParams['index'], 'id' => $arrParams['id']])->asBool()) {
+
+                unset($arrParams['body']['id']);
+
+                $this->getClient()->update([
+                    'index' => $arrParams['index'],
+                    'id' => $arrParams['id'],
+                    'body' => [
+                        'doc'  => $arrParams['body']
+                    ]
+                ]);
+
+                System::getContainer()
+                    ->get('monolog.logger.contao')
+                    ->log(LogLevel::DEBUG, 'Index (' . $arrParams['index'] . ') document with ID ' . $arrParams['id'] . ' was updated.', ['contao' => new ContaoContext(__CLASS__ . '::' . __FUNCTION__, TL_CRON)]);
+            } else {
+
+                $this->getClient()->index($arrParams);
+
+                System::getContainer()
+                    ->get('monolog.logger.contao')
+                    ->log(LogLevel::DEBUG, 'Index (' . $arrParams['index'] . ') document with ID ' . $arrParams['id'] . ' was created.', ['contao' => new ContaoContext(__CLASS__ . '::' . __FUNCTION__, TL_CRON)]);
+            }
+
+        } catch (\Exception $objError) {
+
+            System::getContainer()
+                ->get('monolog.logger.contao')
+                ->log(LogLevel::DEBUG, $objError->getMessage(), ['contao' => new ContaoContext(__CLASS__ . '::' . __FUNCTION__, TL_CRON)]);
+
+            return;
+        }
+
+        /*
+        try {
+
             if ($this->getClient()->exists(['index' => $strIndex, 'id' => $arrDocument['id']])->asBool()) {
                 $this->getClient()->deleteByQuery([
                     'index' => $strIndex,
@@ -400,7 +436,7 @@ class Elasticsearch extends Adapter
 
             return;
         }
-
+        */
         $objIndicesModel->last_indexed = time();
         $objIndicesModel->save();
     }

@@ -728,14 +728,11 @@ class Elasticsearch extends Adapter
         ];
 
         if (isset($arrKeywords['types']) && is_array($arrKeywords['types']) && !empty($arrKeywords['types'])) {
-            foreach ($arrKeywords['types'] as $strType) {
-                $params['body']['query']['bool']['filter'][] = [
-                    'term' => [
-                        'types' => $strType,
-                        'case_insensitive' => false
-                    ]
-                ];
-            }
+            $params['body']['query']['bool']['filter'][] = [
+                'terms' => [
+                    'types' => $arrKeywords['types'],
+                ]
+            ];
         }
 
         if (empty($params['body']['query'])) {

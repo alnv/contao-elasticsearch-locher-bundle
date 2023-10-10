@@ -682,14 +682,14 @@ class Elasticsearch extends Adapter
                 'analyzer' => $strAnalyzer,
                 'type' => 'phrase_prefix',
                 // 'boost' => 2,
-                'fields' => ['title', 'description', 'text', 'document']
+                'fields' => ['description', 'text', 'document']
             ];
 
             $arrShouldMatch = [
                 'query' => $arrKeywords['query'],
                 'analyzer' => $strAnalyzer,
                 'type' => 'phrase_prefix',
-                'fields' => ['title^5', 'h1^10', 'strong', 'h2^2', 'h3', 'h4', 'h5', 'h6']
+                'fields' => ['title', 'h1', 'strong', 'h2', 'h3', 'h4', 'h5', 'h6']
             ];
 
             if (isset($arrOptions['fuzziness'])) {

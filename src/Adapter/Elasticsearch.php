@@ -677,39 +677,26 @@ class Elasticsearch extends Adapter
 
         if (isset($arrKeywords['query']) && $arrKeywords['query']) {
 
-            $arrMustMatch = [
-                'query' => $arrKeywords['query'],
-                'analyzer' => $strAnalyzer,
-                'type' => 'phrase_prefix',
-                // 'boost' => 2,
-                'fields' => ['description', 'text', 'document']
-            ];
-
-            $arrShouldMatch = [
-                'query' => $arrKeywords['query'],
-                'analyzer' => $strAnalyzer,
-                'type' => 'phrase_prefix',
-                'fields' => ['title', 'h1', 'strong', 'h2', 'h3', 'h4', 'h5', 'h6']
-            ];
-
-            if (isset($arrOptions['fuzziness'])) {
-
-                $arrMustMatch['fuzziness'] = 'AUTO';
-                $arrMustMatch['type'] = 'best_fields';
-
-                $arrShouldMatch['fuzziness'] = 'AUTO';
-                $arrShouldMatch['type'] = 'best_fields';
-            }
-
             $params['body']['query']['bool'] = [
                 'must' => [
                     [
-                        'multi_match' => $arrMustMatch
+                        'multi_match' => [
+                            'query' => $arrKeywords['query'],
+                            'analyzer' => $strAnalyzer,
+                            'type' => 'most_fields',
+                            'fuzziness' => 'AUTO',
+                            'fields' => ['text', 'description', 'document']
+                        ]
                     ]
                 ],
                 'should' => [
                     [
-                        'multi_match' => $arrShouldMatch
+                        'multi_match' => [
+                            'query' => $arrKeywords['query'],
+                            'analyzer' => $strAnalyzer,
+                            'type' => 'phrase',
+                            'fields' => ['title^3', 'h1^3', 'strong', 'h2', 'h3', 'h4', 'h5', 'h6']
+                        ]
                     ]
                 ]
             ];

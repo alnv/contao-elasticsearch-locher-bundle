@@ -6,6 +6,7 @@ use Alnv\ContaoElasticsearchLocherBundle\Helpers\States;
 use Alnv\ContaoElasticsearchLocherBundle\Helpers\Text;
 use Alnv\ContaoElasticsearchLocherBundle\Models\IndicesModel;
 use Contao\CoreBundle\Search\Document;
+use Contao\Validator;
 use Fusonic\OpenGraph\Consumer;
 use Symfony\Component\DomCrawler\Crawler;
 use Alnv\ContaoElasticsearchLocherBundle\Adapter\Elasticsearch;
@@ -53,6 +54,18 @@ class Indices extends Searcher
         $strUrl = $document->getUri()->__toString();
         $strUrl = \StringUtil::decodeEntities($strUrl);
         $strUrl = strtok($strUrl, '?');
+
+        $arrCanonicalUrls = $this->objCrawler->filterXpath("//link[@rel='canonical']")->extract(['href']);
+        if (is_array($arrCanonicalUrls) && !empty($arrCanonicalUrls) && isset($arrCanonicalUrls[0])) {
+
+            $strCanonicalUrl = $arrCanonicalUrls[0];
+            $strCanonicalUrl = \StringUtil::decodeEntities($strCanonicalUrl);
+            $strCanonicalUrl = strtok($strCanonicalUrl, '?');
+
+            if (Validator::isUrl($strCanonicalUrl)) {
+                $strUrl = $strCanonicalUrl;
+            }
+        }
 
         $objIndicesModel = IndicesModel::findByUrl($strUrl);
         $arrSearchTypes = [];

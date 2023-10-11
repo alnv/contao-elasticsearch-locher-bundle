@@ -620,7 +620,7 @@ class Elasticsearch extends Adapter
      * @throws \Elastic\Elasticsearch\Exception\ClientResponseException
      * @throws \Elastic\Elasticsearch\Exception\ServerResponseException
      */
-    public function search($arrKeywords, array $arrOptions = [], bool $blnTryItAgain = true): array
+    public function search($arrKeywords, array $arrOptions = [], bool $blnTryItAgain = true, int $intTryCounts = 0): array
     {
 
         $arrResults = [
@@ -677,29 +677,80 @@ class Elasticsearch extends Adapter
 
         if (isset($arrKeywords['query']) && $arrKeywords['query']) {
 
-            $params['body']['query']['bool'] = [
-                'must' => [
-                    [
-                        'multi_match' => [
-                            'query' => $arrKeywords['query'],
-                            'analyzer' => $strAnalyzer,
-                            'type' => 'most_fields',
-                            'fuzziness' => 'AUTO',
-                            'fields' => ['text', 'description', 'document']
+            switch ($intTryCounts) {
+                case 0:
+                    $params['body']['query']['bool'] = [
+                        'must' => [
+                            [
+                                'multi_match' => [
+                                    'query' => $arrKeywords['query'],
+                                    'analyzer' => $strAnalyzer,
+                                    'type' => 'phrase_prefix',
+                                    'fields' => ['description', 'text']
+                                ]
+                            ]
+                        ],
+                        'should' => [
+                            [
+                                'multi_match' => [
+                                    'query' => $arrKeywords['query'],
+                                    'analyzer' => $strAnalyzer,
+                                    'type' => 'phrase_prefix',
+                                    'fields' => ['title^3', 'h1^5', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong']
+                                ]
+                            ]
                         ]
-                    ]
-                ],
-                'should' => [
-                    [
-                        'multi_match' => [
-                            'query' => $arrKeywords['query'],
-                            'analyzer' => $strAnalyzer,
-                            'type' => 'phrase',
-                            'fields' => ['title^3', 'h1^3', 'strong', 'h2', 'h3', 'h4', 'h5', 'h6']
+                    ];
+                    break;
+                case 1:
+                    $params['body']['query']['bool'] = [
+                        'must' => [
+                            [
+                                'query_string' => [
+                                    'query' => '*' . $arrKeywords['query'] . '*',
+                                    'fields' => ['title', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'description', 'text']
+                                ]
+                            ]
+                        ],
+                        'should' => [
+                            [
+                                'multi_match' => [
+                                    'query' => $arrKeywords['query'],
+                                    'analyzer' => $strAnalyzer,
+                                    'type' => 'best_fields',
+                                    'fields' => ['title', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong']
+                                ]
+                            ]
                         ]
-                    ]
-                ]
-            ];
+                    ];
+                    break;
+                case 2:
+                    $params['body']['query']['bool'] = [
+                        'must' => [
+                            [
+                                'multi_match' => [
+                                    'query' => $arrKeywords['query'],
+                                    'analyzer' => $strAnalyzer,
+                                    'type' => 'best_fields',
+                                    'fuzziness' => 'AUTO',
+                                    'fields' => ['description', 'text', 'document']
+                                ]
+                            ]
+                        ],
+                        'should' => [
+                            [
+                                'multi_match' => [
+                                    'query' => $arrKeywords['query'],
+                                    'analyzer' => $strAnalyzer,
+                                    'type' => 'best_fields',
+                                    'fuzziness' => 'AUTO',
+                                    'fields' => ['title', 'h1', 'strong', 'h2^2', 'h3', 'h4', 'h5', 'h6']
+                                ]
+                            ]
+                        ]
+                    ];
+                    break;
+            }
         }
 
         $params['body']['query']['bool']['filter'][] = [
@@ -751,10 +802,10 @@ class Elasticsearch extends Adapter
             }
         }
 
-        if (empty($arrResults['hits']) && $blnTryItAgain) {
-            return $this->search($arrKeywords, [
-                'fuzziness' => 'AUTO'
-            ], false);
+        $intMaxTryCounts = 2;
+        if (empty($arrResults['hits']) && $intMaxTryCounts > $intTryCounts) {
+            $intNextTryCount = $intTryCounts + 1;
+            return $this->search($arrKeywords, [], true, $intNextTryCount);
         }
 
         return $arrResults;

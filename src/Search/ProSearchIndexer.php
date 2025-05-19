@@ -4,6 +4,7 @@ namespace Alnv\ContaoElasticsearchLocherBundle\Search;
 
 use Alnv\ContaoElasticsearchLocherBundle\Helpers\States;
 use Alnv\ContaoElasticsearchLocherBundle\Models\IndicesModel;
+use Contao\CoreBundle\Framework\ContaoFramework;
 use Contao\CoreBundle\Search\Document;
 use Contao\CoreBundle\Search\Indexer\IndexerException;
 use Contao\CoreBundle\Search\Indexer\IndexerInterface;
@@ -13,6 +14,17 @@ use Contao\CoreBundle\Search\Indexer\IndexerInterface;
  */
 class ProSearchIndexer implements IndexerInterface
 {
+
+    private ContaoFramework $framework;
+
+    private bool $indexProtected;
+
+    public function __construct(ContaoFramework $framework, bool $indexProtected = false)
+    {
+        $this->framework = $framework;
+        $this->indexProtected = $indexProtected;
+    }
+
     public function index(Document $document): void
     {
 
@@ -59,12 +71,17 @@ class ProSearchIndexer implements IndexerInterface
             $this->throwBecause('Indexing when the front end preview is enabled is not possible.');
         }
 
+        $this->framework->initialize();
+
         new Indices($document, $meta);
         new PDFIndices($document, $meta);
     }
 
     public function delete(Document $document): void
     {
+
+        $this->framework->initialize();
+
         $strUrl = $document->getUri()->__toString();
         $objIndices = IndicesModel::findByUrl($strUrl);
 
@@ -78,6 +95,8 @@ class ProSearchIndexer implements IndexerInterface
 
     public function clear(): void
     {
+        $this->framework->initialize();
+
         $objIndices = IndicesModel::findAll();
 
         if (!$objIndices) {

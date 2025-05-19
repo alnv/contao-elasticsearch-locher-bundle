@@ -8,5 +8,7 @@ services:
   Alnv\ContaoElasticsearchLocherBundle\Controller\ProSearchController:
     public: true
   Alnv\ContaoElasticsearchLocherBundle\Search\ProSearchIndexer:
+    arguments:
+      - '@contao.framework'
     tags:
       - { name: 'contao.search_indexer' }

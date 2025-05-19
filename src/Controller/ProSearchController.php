@@ -2,26 +2,20 @@
 
 namespace Alnv\ContaoElasticsearchLocherBundle\Controller;
 
-use Contao\Input;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Alnv\ContaoElasticsearchLocherBundle\Helpers\Credentials;
 use Alnv\ContaoElasticsearchLocherBundle\Adapter\Elasticsearch;
+use Alnv\ContaoElasticsearchLocherBundle\Helpers\Credentials;
+use Contao\Input;
+use Contao\CoreBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
-/**
- *
- * @Route("/ps", defaults={"_scope" = "frontend", "_token_check" = false})
- */
-class ProSearchController extends \Contao\CoreBundle\Controller\AbstractController {
+#[Route(path: '/ps', name: 'elastic-controller', defaults: ['_scope' => 'frontend', '_token_check' => false])]
+class ProSearchController extends AbstractController
+{
 
-    /**
-     *
-     * @Route("/search/results", methods={"POST", "GET"}, name="get-search-results")
-     */
-    public function getSearchResults() {
+    #[Route(path: '/search/results', methods: ["POST", "GET"])]
+    public function getSearchResults(): JsonResponse
+    {
 
         $this->container->get('contao.framework')->initialize();
 
@@ -64,9 +58,9 @@ class ProSearchController extends \Contao\CoreBundle\Controller\AbstractControll
         }
 
         $objModule = \ModuleModel::findByPk($strModuleId);
-        $strSearchResultsTemplate = $objModule ? ($objModule->psResultsTemplate??'ps_search_result') : 'ps_search_result';
+        $strSearchResultsTemplate = $objModule ? ($objModule->psResultsTemplate ?? 'ps_search_result') : 'ps_search_result';
 
-        foreach (($arrResults['results']['hits']??[]) as $index => $arrResult) {
+        foreach (($arrResults['results']['hits'] ?? []) as $index => $arrResult) {
             $objTemplate = new \FrontendTemplate($strSearchResultsTemplate);
             $objTemplate->setData($arrResult);
             $arrResults['results']['hits'][$index]['template'] = \Controller::replaceInsertTags($objTemplate->parse());
@@ -75,11 +69,9 @@ class ProSearchController extends \Contao\CoreBundle\Controller\AbstractControll
         return new JsonResponse($arrResults);
     }
 
-    /**
-     *
-     * @Route("/search/autocompletion", methods={"POST", "GET"}, name="get-search-autocompletion")
-     */
-    public function getAutoCompletion() {
+    #[Route(path: '/search/autocompletion', methods: ["POST", "GET"])]
+    public function getAutoCompletion()
+    {
 
         $this->container->get('contao.framework')->initialize();
 

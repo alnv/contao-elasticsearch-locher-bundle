@@ -159,10 +159,11 @@ class Elasticsearch extends Adapter
                     ]
                 ]
             ]);
-
+            /*
             System::getContainer()
                 ->get('monolog.logger.contao')
                 ->log(LogLevel::DEBUG, 'Index document with ID ' . $strIndicesId . ' was deleted.', ['contao' => new ContaoContext(__CLASS__ . '::' . __FUNCTION__, TL_CRON)]);
+            */
         }
 
         $objMicrodataModel = MicrodataModel::findByPid($strIndicesId);
@@ -388,17 +389,19 @@ class Elasticsearch extends Adapter
                         'doc'  => $arrParams['body']
                     ]
                 ]);
-
+                /*
                 System::getContainer()
                     ->get('monolog.logger.contao')
                     ->log(LogLevel::DEBUG, 'Index (' . $arrParams['index'] . ') document with ID ' . $arrParams['id'] . ' was updated.', ['contao' => new ContaoContext(__CLASS__ . '::' . __FUNCTION__, TL_CRON)]);
+                */
             } else {
 
                 $this->getClient()->index($arrParams);
-
+                /*
                 System::getContainer()
                     ->get('monolog.logger.contao')
                     ->log(LogLevel::DEBUG, 'Index (' . $arrParams['index'] . ') document with ID ' . $arrParams['id'] . ' was created.', ['contao' => new ContaoContext(__CLASS__ . '::' . __FUNCTION__, TL_CRON)]);
+                */
             }
 
         } catch (\Exception $objError) {
